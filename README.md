@@ -1,4 +1,4 @@
-# Meta-Analysis Project
+# Meta-Analysis - LULC and Semantic Segmentation in Agriculture
 
 A comprehensive meta-analysis of AI-based semantic segmentation models for agricultural land-use and land-cover (LULC) mapping. This repository centralizes all project resources—data, scripts, documentation, figures—and supports fully reproducible research.
 
