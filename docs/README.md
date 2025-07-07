@@ -1,6 +1,7 @@
 # Systematic Review Protocol
 
 This protocol follows PRISMA guidelines to conduct a systematic review and meta-analysis of AI-based semantic segmentation models for agricultural land-use and land-cover (LULC) mapping.
+
 ![protocol_diagram](flow.png)
 
 ## 1. Objective
