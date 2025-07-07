@@ -8,7 +8,7 @@ A comprehensive meta-analysis of AI-based semantic segmentation models for agric
 
 ```
 ├── docs/                    # Documentation (protocol, PRISMA flowchart, methodology)
-│   └── protocol.md          # Systematic review protocol
+│   └── README.md            # Systematic review protocol
 ├── meta/                    # Core meta-analysis code
 │   ├── assets/              # Final figures and plots (PDF, PNG)
 │   ├── meta.r               # R script for 3-level multilevel meta-analysis
