@@ -23,7 +23,7 @@ Evaluate the quantitative performance of machine learning and deep learning mode
 
 **Databases:** Scopus, Web of Science, IEEE Xplore
 
-**Publication period:** 2015–present
+**Publication period:** 2018– May 2025
 
 **Search string:**
 
