@@ -11,13 +11,11 @@ if (any(!pkgs %in% inst)) install.packages(setdiff(pkgs, inst))
 library(metafor); library(readxl); library(dplyr); library(janitor)
 library(stringr); library(tibble)
 
-## 2 · DATA IMPORT --------------------------------------------------------------
 df <- read_excel("meta_analysis_v4.xlsx", sheet = "geral") %>%
   clean_names() %>%
   rename(n_samples = test_or_validation_samples,
          f1_raw    = f1_score)
 
-## 3 · PRE-PROCESSING -----------------------------------------------------------
 df <- df %>%
   mutate(
     f1_raw    = as.numeric(f1_raw) /
@@ -35,7 +33,6 @@ df <- df %>%
   ) %>%
   ungroup()
 
-## 4 · GLOBAL MODEL -------------------------------------------------------------
 res <- rma.mv(
   yi_logit, vi_logit,
   random = ~1 | study_id/arm_id,
@@ -43,24 +40,22 @@ res <- rma.mv(
   data = df
 )
 
-overall    <- predict(res, transf = transf.ilogit)  # 95% CI + PI already computed
+overall    <- predict(res, transf = transf.ilogit)
 sigma2_L3  <- res$sigma2[1]; sigma2_L2 <- res$sigma2[2]
 sigma2_L1  <- mean(df$vi_logit)
 
-cat("\n========== OVERALL EFFECT ==========\n")
 cat(sprintf("Combined mean F1     : %.3f\n", overall$pred))
 cat(sprintf("95%% CI               : [%.3f ; %.3f]\n",
             overall$ci.lb, overall$ci.ub))
 cat(sprintf("95%% PI               : [%.3f ; %.3f]\n",
             overall$pi.lb, overall$pi.ub))
 
-cat("\n========== HETEROGENEITY ==========\n")
 cat(sprintf("I² between studies (L3): %.1f %%\n",
             100 * sigma2_L3/(sigma2_L3 + sigma2_L2 + sigma2_L1)))
 cat(sprintf("I² within studies  (L2): %.1f %%\n",
             100 * sigma2_L2/(sigma2_L3 + sigma2_L2 + sigma2_L1)))
 
-# --- 95% CI for tau² and I² ----------------------------------
+
 ci_tau    <- confint(res)$random
 total_var <- sigma2_L3 + sigma2_L2 + sigma2_L1
 
@@ -75,15 +70,11 @@ I2_L2_ci <- i2_interval(
   total_var
 )
 
-cat("\n========== I² with 95% CI ==========\n")
 cat(sprintf("I² between studies (L3): %.1f %% [%.1f – %.1f]\n",
             100*sigma2_L3 / total_var, I2_L3_ci[1], I2_L3_ci[2]))
 cat(sprintf("I² within studies  (L2): %.1f %% [%.1f – %.1f]\n",
             100*sigma2_L2 / total_var, I2_L2_ci[1], I2_L2_ci[2]))
 
-###############################################################################
-# 5 · FUNNEL PLOT + EGGER TEST ------------------------------------------------
-###############################################################################
 study_level <- df %>%
   group_by(study_id) %>%
   summarise(
@@ -108,9 +99,6 @@ funnel(
 )
 abline(v = res$beta, lty = 2)
 
-###############################################################################
-# 6 · GLOBAL FOREST PLOT (13 STUDIES) ------------------------------------------
-###############################################################################
 forest(
   study_level$yi_logit, vi = study_level$vi_logit,
   transf = transf.ilogit,
@@ -131,9 +119,6 @@ addpoly(
   mlab   = "Overall"
 )
 
-###############################################################################
-# 7 · MODERATORS – DATA PREP ---------------------------------------------------
-###############################################################################
 df <- df %>%
   mutate(
     data_resolution_m = ifelse(
@@ -162,9 +147,6 @@ df <- df %>%
     ) %>% factor()
   )
 
-###############################################################################
-# 8 · SUBGROUP MODELS ----------------------------------------------------------
-###############################################################################
 res_task <- rma.mv(
   yi_logit, vi_logit,
   random = ~1 | study_id/arm_id,
@@ -221,9 +203,6 @@ forest_moderator(res_arch, "arch_grp",         "Base Architecture")
 forest_moderator(res_task, "segmentation_type","Task Type")
 forest_moderator(res_src,  "sensor_cat",       "Sensor / Data Source")
 
-###############################################################################
-# 9 · META-REGRESSION (RESOLUTION) ---------------------------------------------
-###############################################################################
 res_res <- rma.mv(
   yi_logit, vi_logit,
   random = ~1 | study_id/arm_id,
@@ -255,9 +234,6 @@ grid <- seq(
 lines(plogis(beta[1] + beta[2]*grid), grid, lty = 2)
 abline(v = overall$pred, lty = 3)
 
-###############################################################################
-# 10 · LEAVE-ONE-OUT ANALYSIS --------------------------------------------------
-###############################################################################
 loo_tbl <- lapply(unique(df$study_id), function(s) {
   fit <- rma.mv(
     yi_logit, vi_logit,
@@ -287,9 +263,6 @@ summary(res_task)
 summary(res_arch)
 summary(res_src)
 
-###############################################################################
-# 11 · PRINT NUMBERS FOR TABLE (console only) ---------------------------------
-###############################################################################
 # A) Overall effect and intervals
 cat("\n========== OVERALL EFFECT ==========\n")
 cat(sprintf("Combined mean F1         : %.3f\n", overall$pred))
@@ -298,7 +271,6 @@ cat(sprintf("95%% CI                   : [%.3f – %.3f]\n",
 cat(sprintf("95%% PI                   : [%.3f – %.3f]\n",
             overall$pi.lb, overall$pi.ub))
 
-# B) Heterogeneity metrics
 sigma2_L3  <- res$sigma2[1]
 sigma2_L2  <- res$sigma2[2]
 sigma2_L1  <- mean(df$vi_logit)
@@ -313,7 +285,6 @@ cat(sprintf("I² between studies       : %.1f %%\n",
 cat(sprintf("I² within studies        : %.1f %%\n",
             100 * sigma2_L2 / total_var))
 
-# C) Egger’s test
 egger <- with(
   study_level,
   regtest(yi_logit, sei = sei_logit, model = "lm")
@@ -324,13 +295,9 @@ cat(sprintf("t(%d) = %.2f,  p = %.3f\n",
 cat("\n")
 print(egger)
 
-###############################################################################
-# 12 · PRINT SUBGROUP DATA (console only) -------------------------------------
-###############################################################################
 library(dplyr)
 library(glue)
 
-#– helper to extract predicted F1 and 95% CI per level  -----------------------
 pred_by_level <- function(rma_obj, var) {
   levs <- levels(df[[var]])
   X    <- model.matrix(
@@ -346,7 +313,6 @@ pred_by_level <- function(rma_obj, var) {
   )
 }
 
-# 1 · Architecture subgroup ---------------------------------------------------
 tbl_arch <- df %>%
   count(arch_grp, name = "n_arms") %>%
   full_join(pred_by_level(res_arch, "arch_grp"),
@@ -354,9 +320,8 @@ tbl_arch <- df %>%
   mutate(moderator = "Architecture") %>%
   select(moderator, subgroup = arch_grp, n_arms, F1, LCL, UCL)
 
-p_arch <- res_arch$QMp  # moderator p-value
+p_arch <- res_arch$QMp
 
-# 2 · Task type subgroup ------------------------------------------------------
 tbl_task <- df %>%
   count(segmentation_type, name = "n_arms") %>%
   full_join(pred_by_level(res_task, "segmentation_type"),
@@ -366,7 +331,6 @@ tbl_task <- df %>%
 
 p_task <- res_task$QMp
 
-# 3 · Data source subgroup ----------------------------------------------------
 tbl_src <- df %>%
   count(sensor_cat, name = "n_arms") %>%
   full_join(pred_by_level(res_src, "sensor_cat"),
@@ -376,7 +340,6 @@ tbl_src <- df %>%
 
 p_src <- res_src$QMp
 
-# Consolidate and print -------------------------------------------------------
 print(tbl_arch, n = Inf)
 cat(glue("\n(p = {formatC(p_arch, digits = 3, format = 'f')})\n\n"))
 
