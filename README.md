@@ -135,9 +135,18 @@ A comprehensive meta-analysis of AI-based semantic segmentation models for agric
 
 If you find this work useful, please cite:
 
+```text
+Batista, M. M., Batista, B. G., Souza, V. C. O., Souza, A. D., Volpato, M. M. L., & Alves, H. M. R. (2026).
+Deep Semantic Segmentation for Agricultural Mapping: A Meta Analytic Review.
+In Proceedings of the 17th International Conference on Information, Intelligence, Systems and Applications (IISA 2026).
 ```
-Batista, M., Batista, B., Souza, V., & Souza, A. (2025).
-Advances in Land Use and Land Cover Segmentation: A Meta‑Analytic Review of Artificial Intelligence‑Based Models.
+
+Once available, please also cite the archived supplementary materials:
+
+```text
+Batista, M. M., Batista, B. G., Souza, V. C. O., Souza, A. D., Volpato, M. M. L., & Alves, H. M. R. (2026).
+Supplementary materials for Deep Semantic Segmentation for Agricultural Mapping: A Meta Analytic Review.
+Zenodo. https://doi.org/XX.XXXX/zenodo.XXXXXXX
 ```
 
 ---
