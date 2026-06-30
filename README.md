@@ -146,7 +146,7 @@ Once available, please also cite the archived supplementary materials:
 ```text
 Batista, M. M., Batista, B. G., Souza, V. C. O., Souza, A. D., Volpato, M. M. L., & Alves, H. M. R. (2026).
 Supplementary materials for Deep Semantic Segmentation for Agricultural Mapping: A Meta Analytic Review.
-Zenodo. [https://doi.org/10.5281/zenodo.20575643](https://doi.org/10.5281/zenodo.20575643)
+Zenodo. https://doi.org/10.5281/zenodo.20575643
 ```
 
 ---
